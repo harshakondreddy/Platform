@@ -1,0 +1,3 @@
+[submodule "Platfrom-Essentials"]
+	path = Platfrom-Essentials
+	url = https://github.com/harshakondreddy/Essentials.git
