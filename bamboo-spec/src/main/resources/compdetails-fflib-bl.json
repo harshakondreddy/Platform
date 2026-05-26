@@ -1,0 +1,9 @@
+[
+  {
+  "compName" : "ffw-storage-selection",
+  "planKey" : "BLSSLIB",
+  "bbProjectKey" : "FFW",
+  "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/ffw/ffw-storage-selection.git",
+  "sccConfigProject" : "tgt"
+  }
+]

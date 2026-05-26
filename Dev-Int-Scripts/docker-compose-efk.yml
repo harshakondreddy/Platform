@@ -1,0 +1,68 @@
+version: '2.1'
+services:
+  elasticsearch:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/intellig-elasticsearch:6.4.1
+    restart: always
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "10m"
+    volumes:
+      - /data/deployments/data/es:/usr/share/elasticsearch/data
+    environment:
+      - "ES_HEAP_SIZE=2g"
+      - MAX_LOCKED_MEMORY=unlimited
+      - MAX_MAP_COUNT=262144
+      - MAX_OPEN_FILES=65536
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+  
+  fluentd:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/intellig-fluentd:v1.2.6
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "10m"
+    ports:
+      - "24224:24224"
+    volumes:
+      - /data/reds-qa:/fluentd/etc
+    environment:
+      - FLUENTD_CONF=fluent_central.conf
+    links:
+      - elasticsearch:elasticsearch
+    
+  kibana:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/intellig-kibana:6.4.1
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "10m"
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_URL=http://$DOCKERHOST:9200
+    links:
+      - elasticsearch:elasticsearch
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: "198.168.1.1/24"

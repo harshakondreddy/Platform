@@ -1,0 +1,17 @@
+version: '2.1'
+services:
+
+  eureka:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/eureka:0.1
+    ports:
+      - 8761:8080
+    logging:
+        driver: fluentd
+        options:
+          fluentd-address: $DOCKERHOST:24224
+          tag: docker
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - VIRTUAL_HOST=$DOCKERHOST
+      - PORT=8080
+

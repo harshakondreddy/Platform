@@ -1,0 +1,20 @@
+version: '2.1'
+services:
+  sccserver:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/reds-sccserver:gold-002a0b4
+    container_name: sccserver
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - EUREKA_HOST=$DOCKERHOST
+      - scc_search_paths={application}, {application}/extended-attributes, {application}/feature-flags, {application}/properties, {application}/error-codes,{application}/seed-data,{application}/globalization,{application}/json-validator-schema,{application}/seedData
+      - VIRTUAL_HOST=$DOCKERHOST
+      - MESSAGING_HOST=$DOCKERHOST
+      - "SCC_GIT_URI=https://bitbucket.honeywell.com/scm/rc/configuration.git"
+      - JAVA_OPTS=-Xmx512m
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=configuser
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=configuser@1
+    extra_hosts:
+      - "dockerhost:$DOCKERHOST"
+

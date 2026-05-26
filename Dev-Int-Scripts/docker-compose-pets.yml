@@ -1,0 +1,80 @@
+version: '2.1'
+services:
+
+  eureka:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/eureka:0.1
+    ports:
+      - 8761:8080
+    logging:
+        driver: fluentd
+        options:
+          fluentd-address: $DOCKERHOST:24224
+          tag: docker
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - VIRTUAL_HOST=$DOCKERHOST
+      - PORT=8080
+
+  rabbitmq:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/reds-rabbitmq:3.7.3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    logging:
+        driver: fluentd
+        options:
+          fluentd-address: $DOCKERHOST:24224
+          tag: docker
+
+  sccserver:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/reds-sccserver:gold-002a0b4
+    container_name: sccserver
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - EUREKA_HOST=$DOCKERHOST
+      - scc_search_paths={application}, {application}/extended-attributes, {application}/feature-flags, {application}/properties, {application}/error-codes,{application}/seed-data,{application}/globalization,{application}/json-validator-schema,{application}/seedData
+      - VIRTUAL_HOST=$DOCKERHOST
+      - MESSAGING_HOST=$DOCKERHOST
+      - "SCC_GIT_URI=https://bitbucket.honeywell.com/scm/rc/configuration.git"
+      - JAVA_OPTS=-Xmx512m
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=configuser
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=configuser@1
+    extra_hosts:
+      - "dockerhost:$DOCKERHOST"
+  hazelcast:
+    container_name: hazelcast
+    depends_on:
+    - hazelcastmanagement
+    environment:
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - server.port=8089
+    - hazelcast.discovery.public.ip.enabled=true
+    - hazelcast.management.console.url=http://$DOCKERHOST:18000/hazelcast-mancenter
+    - MEM_OPTS=-Xmx8192m -Dhazelcast.local.publicAddress=$DOCKERHOST:5701 -Dhazelcast.eureka.enabled=true
+      -Deureka.client.registerWithEureka=false -Deureka.client.fetchRegistry=false
+      -Dhazelcast.discovery.public.ip.enabled=true -Deureka.client.serviceUrl.defaultZone=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/ 
+    - unique.app.uniqueId=HAZ
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/hazelcast-server:latest
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 8089:8080
+    - 5701:5701
+
+  hazelcastmanagement:
+    container_name: hazelcast-management
+    environment:
+    - JAVA_OPTS=-Dhazelcast.mc.allowMultipleLogin=true
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/hazelcast-mc:gold-3.12.7
+    mem_limit: 512m
+    ports:
+    - 18000:8080
+

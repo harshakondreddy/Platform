@@ -1,0 +1,30 @@
+[
+  {
+  "compName" : "component-asrs",
+  "planKey" : "AUTOASRS",
+  "bbProjectKey" : "RC",
+  "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-asrs.git",
+  "sccConfigProject" : "RC"
+},
+  {
+  "compName" : "component-momentumrouter",
+  "planKey" : "MOMENTUMROUTER",
+  "bbProjectKey" : "RC",
+  "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-momentumrouter.git",
+  "sccConfigProject" : "RC"
+},
+  {
+    "compName" : "component-pickexecution",
+    "planKey" : "PICKEXECUTION",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-pickexecution.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-task",
+    "planKey" : "TASK",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-task.git",
+    "sccConfigProject" : "RC"
+  }
+]

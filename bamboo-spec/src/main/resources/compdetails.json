@@ -1,0 +1,203 @@
+[
+  {
+    "compName" : "component-aislelinx",
+    "planKey" : "AISLELINX",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-aislelinx.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-amr",
+    "planKey" : "AUTOAMR",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-amr.git",
+    "sccConfigProject" : "RC"
+  },
+
+  {
+    "compName" : "component-asrsclient",
+    "planKey" : "ASRSCLIENT",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-asrsclient.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-asrsmanager",
+    "planKey" : "ASRSMANAGER",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-asrsmanager.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-businessorchestrator",
+    "planKey" : "BUSINESSORCHESTRATOR",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-businessorchestrator.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-capacitymanager",
+    "planKey" : "CAPACITYMANAGER",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-capacitymanager.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-container",
+    "planKey" : "CONTAINER",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-container.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-crane",
+    "planKey" : "CRANE",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-crane.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-inventory",
+    "planKey" : "INVENTORY",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-inventory.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-liftlinx",
+    "planKey" : "LIFTLINX",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-liftlinx.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-location",
+    "planKey" : "COMLOC",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-location.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-mc4-data-adapter",
+    "planKey" : "MC4DA",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-mc4-data-adapter.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-momentumconnect",
+    "planKey" : "MOMENTUMCONNECT",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-momentumconnect.git",
+    "sccConfigProject" : "RC"
+  },
+
+  {
+    "compName" : "component-order",
+    "planKey" : "COMORDER",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-order.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-print",
+    "planKey" : "PRINT",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-print.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-putaway",
+    "planKey" : "AUTOPUTAW",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-putaway.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-routing",
+    "planKey" : "ROUTING",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-routing.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-routing-stream",
+    "planKey" : "ROUTINGSTREAM",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-routing-stream.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-order-stream",
+    "planKey" : "ORDERSTREAM",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-order-stream.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-storage-stream",
+    "planKey" : "STORAGESTREAM",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-storage-stream.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-routingclient",
+    "planKey" : "ROUTINGCLIENT",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-routingclient.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-shipping",
+    "planKey" : "SHIPPING",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-shipping.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-shuttle",
+    "planKey" : "SHUTTLE",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-shuttle.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-socketproxy",
+    "planKey" : "SOCKETPROXY",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-socketproxy.git",
+    "sccConfigProject" : "RC"
+  },
+
+  {
+    "compName" : "component-taskmanager",
+    "planKey" : "TASKMANAGER",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-taskmanager.git",
+    "sccConfigProject" : "RC"
+  },
+
+  {
+    "compName" : "component-wave",
+    "planKey" : "WAVE",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-wave.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-wmssimulator",
+    "planKey" : "WMSSIMULATOR",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-wmssimulator.git",
+    "sccConfigProject" : "RC"
+  },
+  {
+    "compName" : "component-workassignment",
+    "planKey" : "WORKASSIGNMENT",
+    "bbProjectKey" : "RC",
+    "gitSshUrl" : "ssh://git@bitbucket.honeywell.com:7999/rc/component-workassignment.git",
+    "sccConfigProject" : "RC"
+  }
+]
+

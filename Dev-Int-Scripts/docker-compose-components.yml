@@ -1,0 +1,880 @@
+version: '2.1'
+services:
+  aislelinx:
+    container_name: aislelinx
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=aislelinx
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true  -DmasterCacheEnabled=true 
+    - SCC_HOST=$EUREKAHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/aislelinx:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10231:8080
+
+  amr:
+    container_name: amr
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=amr
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/amr:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10261:8080
+
+  asrsclient:
+    container_name: asrsclient
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=asrsclient
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/asrsclient:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10181:8080
+  asrsmanager:
+    container_name: asrsmanager
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_TYPE=postgres
+    - DB_NAME=asrsmanager
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - SCC_HOST=$DOCKERHOST
+    - SPRING_DATASOURCE_CONTINUE_ON_ERROR=true
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_CONFIGUREDSHUFFLINGSTRATEGY=ReserveLocation
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_MULTIDEPTHSTORAGE=true
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_HANDLELOSTBARCODEACTION=MoveToOutbound
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_LOADPAIRINGSTORE=multiSlot
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_LOADPAIRINGPICK=multiSlot
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_MAXSHUTTLELOADCAPACITY=100.0
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_MAXCONTAINERWIDTHVARIANCE=10.0
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_MAXCONTAINERLENGTH=800.0
+    - ASRSMANAGER_WORKFLOW_WORKFLOWGROUPS_WG01_PARAMETERS_AUTORECOVERY=true
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/asrsmanager:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10201:8080
+  businessorchestrator:
+    container_name: businessorchestrator
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=businessorchestrator
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - http.maxConnections=50
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    - MEM_OPTS=-Xmx768m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+       -DmasterCacheEnabled=true
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/businessorchestrator:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10191:8080
+  capacitymanager:
+    container_name: capacitymanager
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=capacitymanager
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - EUREKA_PORT=8761
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info
+    - SKIP_EUREKA_REGISTRATION_VERIFICATION=true
+    - MEM_OPTS=-Xmx1024m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+       -DmasterCacheEnabled=true
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/capacitymanager:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10031:8080
+  container:
+    container_name: container
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=container
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - http.maxConnections=50
+    - SPRING_DATASOURCE_CONTINUE_ON_ERROR=true
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    - DEFAULT_LOG_LEVEL=DEBUG
+    - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info
+    - MEM_OPTS=-Xmx2048m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+       -DmasterCacheEnabled=true
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/container:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10071:8080
+  crane:
+    container_name: crane
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=crane
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/crane:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10661:8080
+
+  e2e:
+    container_name: e2e
+    environment:
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - environment=$DOCKERHOST
+    - rabbitMQIp=$MSGHOST
+    - userNameWinscp=qauser
+    - password=qauser
+    - momentomConnectIP=$DOCKERHOST
+    - MCenvironment=$DOCKERHOST
+    - JAVA_OPTS=-Xmx2048m
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/mastere2e:gold-master
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10301:8080
+    volumes:
+    - /data/redsqa/e2ereports:/target
+    - /data/redsqa/test:/tmp/
+  inventory:
+    container_name: inventory
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=inventory
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/inventory:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10061:8080
+
+  liftlinx:
+    container_name: liftlinx
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=liftlinx
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - SCC_HOST=$EUREKAHOST
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true  
+    - SPRING_DATASOURCE_CONTINUE_ON_ERROR=true
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/liftlinx:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10251:8080
+
+  location:
+    container_name: location
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=location
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - SCC_HOST=$EUREKAHOST
+    - MEM_OPTS=-Xmx4096m -Xss2048k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/location:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10041:8080
+
+  momentumconnect:
+    container_name: momentumconnect
+    environment:
+    - fileDirectory=/honeywell/wes/
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=momentumconnect
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DEFAULT_LOG_LEVEL=TRACE
+    - http.maxConnections=50
+    - hostInventoryAdjustmentIP=$WMSDUMMYHOST
+    - hostOrderDownloadFailureIP=$WMSDUMMYHOST
+    - hostCompleteOrderDownloadFailureIP=$WMSDUMMYHOST
+    - hostInventoryAllocationIP=$WMSDUMMYHOST
+    - icwWaveStartResponseIP=$WMSDUMMYHOST
+    - hostPickConfirmationIP=$WMSDUMMYHOST
+    - hostPickReplenishmentConfirmationIP=$WMSDUMMYHOST
+    - hostPutawayConfirmationIP=$WMSDUMMYHOST
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - SCC_HOST=10.224.92.202
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+      -DmasterCacheEnabled=true 
+    - hostHeartBeatIP=$WMSDUMMYHOST
+    - hostHeartBeatPort=9900
+    - icwHeartBeatIP=10.2.55.87
+    - icwHeartBeatPort=6000
+    - hostDivertConfirmationPort=9900
+    - hostInventoryAdjustmentPort=9902
+    - hostPickConfirmationPort=9903
+    - hostPutawayConfirmationPort=9905
+    - hostInventoryAllocationPort=9904
+    - hostInventoryDeAllocationIP=$WMSDUMMYHOST
+    - hostInventoryDeAllocationPort=9904
+    - hostRouteRequestResponseIP=$WMSDUMMYHOST
+    - hostRouteRequestResponsePort=9905
+    - hostBufferRetrievalConfirmationPort=9906
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - hostBufferRetrievalConfirmationIP=$WMSDUMMYHOST
+    - hostDivertConfirmationIP=10.2.55.87
+    - hostDivertConfirmationPort=1613
+    - hostCartonCreateIP=10.2.55.87
+    - hostCartonCreatePort=1611
+    - hostCancelCartonIP=10.2.55.87
+    - hostCancelCartonPort=1612
+    - hostCartonCancelIP=10.2.55.87
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    hostname: momentumconnect
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/momentumconnect:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10101:8080
+    - 7564:7564
+    - 7565:7565
+    - 7566:7566
+    - 9900:9900
+    - 9902:9902
+    - 9903:9903
+    - 9904:9904
+    - 9901:9901
+    - 9905:9905
+    - 9906:9906
+    - 4567:4567
+    volumes:
+    - /data/redsqa/momentum_connect:/mnt/
+  momentumtemplate:
+    container_name: momentumtemplate-unified-ui
+    environment:
+    - CLIENT=master
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/momentumtemplate:bronze-master-1.0.0-5b9fb70
+    ports:
+    - 3000:3000
+    volumes:
+    - /data/uified-ui/app-config.json:/usr/share/nginx/html/app-config.json
+  order:
+    container_name: order
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=order
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://$DOCKERHOST:5432/order
+    - SPRING_DATASOURCE_PLATFORM=postgres
+    - http.maxConnections=50
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k  
+      -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+      -DmasterCacheEnabled=true 
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/order:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10011:8080
+
+  order-stream:
+    build: .
+    environment:
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dspring.cloud.stream.kafka.streams.binder.brokers=kafka:29092
+      -Dspring.cloud.stream.kafka.streams.binder.configuration.schema.registry.url=http://schema-registry:8081 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/order-stream:gold-master-0.0.1-8a1c829
+    ports:
+    - 10012:10012
+  print:
+    container_name: print
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=print
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - MEM_OPTS=-Xmx768m -Xss1024k -XX:+UseStringDeduplication -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+      -DmasterCacheEnabled=true 
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/print:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10141:8080
+
+  routing:
+    container_name: routing
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=routing
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - http.maxConnections=50
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - MEM_OPTS=-Xmx2048m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true
+
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/routing:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10111:8080
+
+  routingclient:
+    container_name: routingclient
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_CLEAN=false
+    - DB_PORT=5432
+    - DB_NAME=routingclient
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - EUREKA_HOST=$EUREKAHOST
+    - http.maxConnections=50
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info
+    - SCC_HOST=$EUREKAHOST
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/  -Dhazelcast.discovery.enabled=true
+      -DmasterCacheEnabled=true 
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    hostname: routingclient
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/routingclient:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10131:8080
+
+  shipping:
+    container_name: shipping
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=shipping
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true  -DmasterCacheEnabled=true  
+    - SPRING_RABBITMQ_HOST=$MSGHOST
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/shipping:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10271:8080
+  shuttle:
+    container_name: shuttle
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_CLEAN=false
+    - DB_PORT=5432
+    - DB_NAME=shuttle
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - rabbitMqIp=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - SPRING_DATASOURCE_CONTINUE_ON_ERROR=true
+    - MEM_OPTS=-Xmx768m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    - DEFAULT_LOG_LEVEL=DEBUG
+    - JAVA_OPTS=-Xmx512m
+    - SHUTTLE_TO_PLC_HEARTBEAT_ENABLED=false
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/shuttle:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10221:8080
+
+  socketproxy:
+    container_name: socketproxy
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=socketproxy
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - SCC_HOST=$EUREKAHOST
+    - SPRING_DATASOURCE_CONTINUE_ON_ERROR=true
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true
+    - DEFAULT_LOG_LEVEL=DEBUG
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/socketproxy:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    mem_limit: 4096m
+    mem_reservation: 1024m
+    ports:
+    - 10211:8080
+  storage-stream:
+    environment:
+    - MEM_OPTS=-Xmx1024m -Xss1025k -Deureka.client.serviceUrl.defaultZone=http://$EUREKAHOST:8761/eureka/  -Dspring.cloud.stream.kafka.streams.binder.brokers=kafka:29092
+      -Dspring.cloud.stream.kafka.streams.binder.configuration.schema.registry.url=http://schema-registry:8081
+      -Dmystic.client.kafka.url=kafka:29092 -Dmystic.client.schema.registry.url=http://schema-registry:8081
+      -Dmystic.client.restDebeziumUrl=http://connect-debezium:8083/connectors -Dlogging.level.root=TRACE
+      -Dlogging.level.com.hon.reds=TRACE -Dlogging.level.org.springframework=TRACE
+      -Dlogging.level.org.springframework.amqp.rabbit.listener=TRACE -Dlogging.level.org.springframework.beans.factory.support=TRACE
+      -Dlogging.level.org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer=TRACE
+      -Dlogging.level.com.honeywell.intelligrated.wes.kstreams=TRACE -Ddebug=true
+      -Dspring.main.allow-bean-definition-overriding=true -Dspring.cloud.refresh.refreshable=none
+      -Dspring.datasource.initialization-mode=always  -Dmystic.client.restKafkaConnectUrl=http://$DOCKERHOST:18083/connectors
+      -Dmystic.client.restElasticSearchUrl=http://$DOCKERHOST:9200/_template -Dmystic.client.restSchemaRegistryUrl=http://schema-registry:8081
+      -Dmystic.client.source.connector.topic.name=smdev -Dspring.main.allow-bean-definition-overriding=true
+      -Dspring.cloud.refresh.refreshable=none -Dspring.datasource.initialization-mode=always
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$EUREKAHOST
+    - MESSAGING_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    - MYSTIC_CLIENT_DATASOURCE_TYPE=postgres
+    - MYSTIC_SOURCE_DB_USERNAME=sa
+    - MYSTIC_SOURCE_DB_PASSWORD=Password1
+    - MYSTIC_SOURCE_DB_HOST=$DOCKERHOST
+    - MYSTIC_SOURCE_DB_PORT=5432
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/storage-stream:bronze-master-0.0.1-1cfbc2d
+    ports:
+    - 10501:8080
+  taskmanager:
+    container_name: taskmanager
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=taskmanager
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true  
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/taskmanager:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10091:8080
+
+  uifacade-sm:
+    container_name: uifacade-sm
+    environment:
+    - HOST=10.224.92.202
+    - IP=10.224.92.202
+    - PORT=4001
+    - DB_TYPE=mssql
+    - DB_HOST=10.224.92.175
+    - DB_PORT=1433
+    - DB_USER=uifacadeql
+    - DB_PASS=uifacadeql
+    - EUREKA_URL=10.224.92.202
+    - EUREKA_PORT=8761
+    - WESUI=http://10.224.92.202:3000,http://hic015026:3000
+    - NODE_ENV=production
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/uifacade-sm:bronze-master-1.0.0-90ce4ba
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 4001:4001
+    restart: always
+  uifacadeql:
+    container_name: uifacadeql
+    environment:
+    - HOST=10.224.92.202
+    - IP=10.224.92.202
+    - PORT=4000
+    - DB_TYPE=mssql
+    - DB_HOST=10.224.92.175
+    - DB_PORT=1433
+    - DB_NAME=uifacadeql
+    - DB_USER=uifacadeql
+    - DB_PASS=uifacadeql
+    - EUREKA_URL=10.224.92.202
+    - EUREKA_PORT=8761
+    - WESUI=http://10.224.92.202:3000,http://hic015026:3000
+    - NODE_ENV=production
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/uifacadeql:bronze-master-1.0.0-783f2ba
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 4000:4000
+    restart: always
+  wave:
+    container_name: wave
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=wave
+    - DB_CLEAN=false
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - DB_TYPE=postgres
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://$DOCKERHOST:5432/wave
+    - SPRING_DATASOURCE_PLATFORM=postgres
+    - DDL_EXECUTE=false
+    - GENERATE_DDL=false
+    - UPGRADE_DML=false
+    - EUREKA_HOST=$EUREKAHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$MSGHOST
+    - SCC_HOST=$EUREKAHOST
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=50
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/wave:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    mem_limit: 2048m
+    mem_reservation: 1024m
+    ports:
+    - 10021:8080
+  putaway:
+    container_name: putaway
+    depends_on:
+    - container
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=putaway
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - DEFAULT_LOG_LEVEL=TRACE
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - MEM_OPTS=-Xmx4096m -Xss2048k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/putaway:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10171:8080
+  workassignment:
+    container_name: workassignment
+    environment:
+    - DB_HOST=$DBHOST
+    - DB_PORT=5432
+    - DB_NAME=workassignment
+    - DB_USERNAME=sa
+    - DB_PASSWORD=Password1
+    - GENERATE_DDL=false
+    - DDL_EXECUTE=false
+    - UPGRADE_DML=false
+    - DB_TYPE=postgres
+    - EUREKA_HOST=$DOCKERHOST
+    - VIRTUAL_HOST=$DOCKERHOST
+    - MESSAGING_HOST=$DOCKERHOST
+    - SCC_HOST=$EUREKAHOST
+    - MEM_OPTS=-Xmx2048m -Xss1024k -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      -Dhazelcast.discovery.enabled=true  -DmasterCacheEnabled=true 
+    extra_hosts:
+    - dockerhost:$DOCKERHOST
+    - localhost:$DOCKERHOST
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/workassignment:bronze
+    logging:
+      driver: fluentd
+      options:
+        tag: docker
+    ports:
+    - 10051:8080
+networks:
+  default:
+    ipam:
+      config:
+      - subnet: 198.168.1.1/24
+      driver: default
+
+ 

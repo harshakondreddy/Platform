@@ -1,0 +1,14 @@
+version: '2.1'
+services:
+
+  rabbitmq:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/reds-rabbitmq:3.7.3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    logging:
+        driver: fluentd
+        options:
+          fluentd-address: $DOCKERHOST:24224
+          tag: docker
+ 
