@@ -1,0 +1,16 @@
+version: '2.1'
+services:
+  eureka:
+    image: docker-local.repo.intellig.local/eureka:0.1
+    ports:
+      - 8761:8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - VIRTUAL_HOST=$DOCKERHOST
+      - PORT=8080
+
+  cloud-config-rabbitmq:
+      image: docker-local.repo.intellig.local/reds-rabbitmq:3.7.3-management
+      ports:
+        - 15672:15672
+        - 5672:5672

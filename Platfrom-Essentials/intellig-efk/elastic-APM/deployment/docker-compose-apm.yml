@@ -1,0 +1,12 @@
+version: '2.2'
+services:
+  apm-server:
+    image: docker-local.repo.intellig.local/intellig-apm-server:6.8.3 
+    ports:
+      - 8200:8200
+    environment:
+      - output.elasticsearch.hosts=['http://$EFKHOST:9200']
+      - apm-server.host="$DOCKERHOST:8200"
+      - setup.kibana.host="<<Kibana-Host>>:5601"
+      - setup.template.enabled=true
+      - logging.to_files=false

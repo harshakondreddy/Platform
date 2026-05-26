@@ -1,0 +1,41 @@
+pipeline {
+    agent none
+    environment { CI = 'true' }
+    triggers { pollSCM( ' ') }
+    stages {
+        stage('Basic') {
+            agent { label 'sandbox_linux' }
+
+            steps {
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.libraryName} :: ${params.repoUrl} :: ${params.repo} ::  ${params.prJob}"
+                echo "*************Parameter to this Stage *************"
+                //Checkout source code from given repository on 'feature OR PR branch' branch.
+                    checkout([$class: 'GitSCM', branches: [[name: 'origin/feature/**']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                //Run Build and unit test cases
+                sh "chmod 755 * && ./gradlew clean build --refresh-dependencies"
+               
+            }
+            post{
+                success{
+                     mail to:"DL-Intelligrated-India-SW@honeywell.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed!!. BUILD-URL- ${env.BUILD_URL} "
+              
+                }
+                failure {
+                    mail to:"DL-Intelligrated-India-SW@honeywell.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed!!.  BUILD-URL- ${env.BUILD_URL}"
+                    echo "Failed!!"
+                }
+                always {
+                    //junit test reports                   
+                }
+
+            }
+        }
+     
+        
+    }
+}
+
+

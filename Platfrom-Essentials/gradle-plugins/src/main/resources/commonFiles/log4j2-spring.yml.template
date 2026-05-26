@@ -1,0 +1,52 @@
+Configuration:
+  status: WARN
+  monitorInterval: 60
+
+  appenders:
+    Console:
+      name: LogToConsole
+      PatternLayout:
+        Pattern: "%white{%d{yyyy-MM-dd HH:mm:ss.SSS}} %highlight{%-5level} %blue{[@@appName@@,%X{traceId},%X{spanId}]} %magenta{${sys:PID:- }} %black{---} %white{[%15.15t]} %cyan{%-40.40logger{45}} %black{:} %msg%n"
+
+  Loggers:
+    logger:
+      - name: com.hon.reds
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+          
+      - name: @@appPackageName@@
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+          
+      - name: org.springframework.security
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+       
+      - name: org.apache.http
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+          
+      - name: org.apache.http.wire
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+          
+      - name: com.netflix
+        level: INFO
+        additivity: false
+        AppenderRef:
+          - ref: LogToConsole
+          
+    Root:
+      level: INFO
+      AppenderRef:
+        ref: LogToConsole

@@ -1,0 +1,15 @@
+spring:
+  rabbitmq:
+    host: ${messaging.host:localhost}
+    port: ${messaging.port:5672}
+    username: ${messaging.user:guest}
+    password: ${messaging.password:guest}
+  cloud:
+    bus:
+      enabled: true
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      expose: "*"

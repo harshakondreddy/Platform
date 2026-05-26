@@ -1,0 +1,64 @@
+def commitTag
+def scmVars
+
+pipeline {
+    agent none
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'HOURS')
+    }
+    environment { CI = 'true' }
+    triggers { pollSCM(' ') }
+
+    stages {
+        stage('Basic') {
+            agent { label 'sandbox_linux' }
+
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Basic Stage: BUILD-ONCE and USE in Subsequent Stages of Pipeline. Here build and unit test cases will be executed. On success, artifacts will be published!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.libraryName} :: ${params.repoUrl} :: ${params.repo}  "
+                echo "*************Parameter to this Stage *************"
+                //Checkout source code from given repository on 'master' branch.
+                script{
+                    scmVars = checkout([$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    commitTag = scmVars.GIT_COMMIT.take(7)
+                    
+                }
+                //Run Build and unit test cases
+                sh "chmod 755 * && ./gradlew clean build -x spotlessCheck --refresh-dependencies"
+                //Stops running docker containers
+                sh "/home/jenkins/stop-deps.sh"
+               
+            
+		}
+
+            post{
+
+                success {
+                    sh "git tag -f ${commitTag} && git push -f origin ${commitTag}"
+                   
+                    //Publish Artifacts
+                      sh "./gradlew artifactoryPublish -x spotlessCheck"
+                      mail to:"DL-Intelligrated-India-SW@honeywell.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed!!. BUILD-URL- ${env.BUILD_URL} "
+               }
+                failure {
+                      mail to:"DL-Intelligrated-India-SW@honeywell.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed!!.  BUILD-URL- ${env.BUILD_URL}"                    
+                
+                    echo "failed"
+                }
+                always {
+                    echo "junit reports"
+                }
+
+            }
+
+        }
+        
+    }
+}
+

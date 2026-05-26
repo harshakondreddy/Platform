@@ -1,0 +1,223 @@
+def commitTag
+def ironCommitTag
+def bronzeVersionTag
+def goldVersionTag
+def scmVars
+def versionCommitImg
+def dockerImgName
+def compName
+def version
+def release = "target-release"
+
+pipeline {
+    agent none
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timeout(time: 2, unit: 'HOURS')
+    }
+    environment { CI = 'true' }
+    triggers { pollSCM(' ') }
+
+    stages {
+        stage('Basic') {
+            agent { label 'sandbox_linux' }
+
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Basic Stage: BUILD-ONCE and USE in Subsequent Stages of Pipeline. Here build and unit test cases will be executed. On success, artifacts will be published and tagged - IRON!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.componentName} :: ${params.repoUrl} :: ${params.repo} "
+                echo "*************Parameter to this Stage *************"
+                //Checkout source code from given repository on 'target-release' branch.
+                script{
+                    scmVars = checkout([$class: 'GitSCM', branches: [[name: 'release/target-release']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    commitTag = scmVars.GIT_COMMIT.take(7)
+                    ironCommitTag = "iron-${release}-${commitTag}"
+                  
+                }
+                //Run Build and unit test cases
+                sh "chmod 755 * && ./gradlew clean build -x spotlessCheck --refresh-dependencies"
+                //Stops running docker containers
+                sh "/home/jenkins/stop-deps.sh"
+                //If hasComponentTest flag is True then execute component test cases
+                script {
+                    if (params.hasComponentTest)
+                    {
+                        sh "export SCCREPOURL=/home/jenkins/target-configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew componentTest -x spotlessCheck"
+                        //Stops running docker containers
+                        sh "/home/jenkins/stop-deps.sh"
+                
+                    //Publish test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/componentTest',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Component Report',
+                            reportTitles         : 'Component-Test-Result']
+                    )
+				}
+            }
+            //  withSonarQubeEnv('IntelligSonarQube') {
+            //         sh './gradlew --init-script /home/jenkins/quality.gradle --info sonarqube'
+            //     }
+		}
+
+            post{
+
+                success {
+                    sh "git tag -f ${ironCommitTag} && git push -f origin ${ironCommitTag}"
+                    script{
+                       def fullVersion =sh(script: "./gradlew properties -q | grep \"^version:\" | awk '{match(\$2,\"[0-9].[0-9].[0-9]*\",a)}END{print a[0]}'",
+                        returnStdout: true
+                        ).trim()
+                        compName = params.componentName.substring(10)
+						
+						//Fix for a component version is moving out of snapshot eg: 1.2.4-SNAPSHOT to 1.2.4               					
+					    def result = fullVersion.indexOf('-')
+
+                        if(result != -1)
+                            version = fullVersion.substring(0, fullVersion.indexOf("-"))
+                        else 
+                            version = fullVersion
+
+                        versionCommitImg = "igs-wms-docker-stable-local.artifactory-na.honeywell.com/${compName}:$fullVersion-${commitTag}"
+                        dockerImgName = "igs-wms-docker-stable-local.artifactory-na.honeywell.com/${compName}"
+                        versionImg = "igs-wms-docker-stable-local.artifactory-na.honeywell.com/${compName}:$fullVersion"     
+                        bronzeVersionTag = "bronze-${release}-${version}-${commitTag}"
+	                    goldVersionTag = "gold-${release}-${version}-${commitTag}"
+                    }
+                    //Publish Artifacts
+                      sh "./gradlew artifactoryPublish -x spotlessCheck"
+                    //Build Docker Image
+                      sh "./gradlew buildDockerImage -x spotlessCheck"
+                    //Publish docker image with "iron-<version>-<commitId>" tag
+                      sh "./gradlew -x spotlessCheck pushDockerImage -PcustomTag=${ironCommitTag} -PinputImg=$versionImg"
+                      mail to:"DL-SPSBigLots-Tribe-Team@Honeywell.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed Basic stage!!. BUILD-URL- ${env.BUILD_URL} "
+               }
+                failure {
+					mail to:"DL-SPSBigLots-Tribe-Team@Honeywell.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed Basic stage!!.  BUILD-URL- ${env.BUILD_URL}"                    
+                }
+                always {
+                    //Publish Junit test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/test',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Junit Report',
+                            reportTitles         : 'Unit-Test-Result']
+                    )
+                    cucumber "target/ComponentTest/cucumber.json"
+                }
+
+            }
+
+        }
+        stage('Extended') {
+            agent { label 'sandbox_linux' }
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Extended Stage: Use BUILT-PACKAGE and TAGGED (Iron) to Run more extensive test cases (Like Integration test, Consumer Tests, etc..). On success, artifacts will be published and tagged - BRONZE!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.componentName} :: ${params.repoUrl} :: ${params.repo} :: ${ironCommitTag}"
+                echo "*************Parameter to this Stage *************"               
+                
+                
+                //If hasIntgTest flag True then execute the intg-test cases.
+                script {
+                    //Checkout source code from given repository on 'target-release' branch.
+                     checkout([$class: 'GitSCM', branches: [[name: 'release/target-release']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    sh "chmod 755 * "
+                    if (params.hasIntgTest)
+                    {
+                     sh "./start-deps-pets.sh && ./start-deps-components.sh && ./gradlew integrationTest -x spotlessCheck"
+                     //Stops running docker containers
+                     sh "/home/jenkins/stop-deps.sh"
+                     publishHTML(target: [
+                        allowMissing         : false,
+                        alwaysLinkToLastBuild: false,
+                        includes             : '**/*',
+                        keepAll              : false,
+                        reportDir            : 'build/reports/tests/integrationTest',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Integration Report',
+                        reportTitles         : 'Integration-Test-Result']
+               		)
+                    }
+                }           
+            }
+            post{
+                success {
+                    //Tag source repository as bronzeVersionTag
+                    sh "git tag -f ${bronzeVersionTag} && git push -f origin ${bronzeVersionTag}"
+                    //Tag source repository as goldVersionTag
+                    sh "git tag -f ${goldVersionTag} && git push -f origin ${goldVersionTag}"
+                    
+                    //Pull Docker Image from last Stage i.e ironCommitTag 
+                    sh "docker pull ${dockerImgName}:$ironCommitTag"
+                    //Tag and publish docker versionCommitImg/ironCommitTag image as bronzeVersionCommit
+                    sh "./gradlew pushDockerImage -PcustomTag=${bronzeVersionTag} -PinputImg=${dockerImgName}:$ironCommitTag -x buildDockerImage -x spotlessCheck"
+                    //Tag and publish docker versionCommitImg image as goldVersionCommit 
+                    sh "./gradlew pushDockerImage -PcustomTag=${goldVersionTag} -PinputImg=${dockerImgName}:$ironCommitTag -x buildDockerImage -x spotlessCheck"
+                   
+                    
+                    mail to:"DL-SPSBigLots-Tribe-Team@Honeywell.com", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed Extended stage!!. BUILD-URL- ${env.BUILD_URL} "
+                }
+                failure {
+                    mail to:"DL-SPSBigLots-Tribe-Team@Honeywell.com", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed Extended stage!!.  BUILD-URL- ${env.BUILD_URL}"
+           
+                }
+                always {
+                	echo "always block"
+                    //TODO: DEVOPS-820 for reporting
+                   // cucumber "target/IntegrationTest/cucumber.json"
+                }
+            }
+        }
+       
+        stage('Update Pre-Manifest') {
+            agent { label 'sandbox_linux' }
+            steps {
+                lock('manifestLock') {
+                    script {
+                        //Checkout source code from given repository on 'master' branch.
+                        checkout([$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag'], [$class: 'RelativeTargetDirectory', 
+            relativeTargetDir: '/home/jenkins/workspace/manifests']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "ssh://git@bitbucket.honeywell.com:7999/tgt/manifests.git"]]])
+        
+                        //update component manifest file
+                        if(!fileExists("${compName}-manifest.yml"))
+                        {
+                            echo "file does not exist"
+                            sh """
+                        cd /home/jenkins/workspace/manifests/component-manifests
+                                    cp component-manifest-template.yml ${compName}-manifest.yml
+                            """
+                        }
+                        sh """
+                                cd /home/jenkins/workspace/manifests
+                                python compManParser.py ${compName} ${bronzeVersionTag} ${version} ${commitTag}
+                                python predepManParser.py ${compName} ${bronzeVersionTag} ${version} ${commitTag}
+                                python versionIncrementer.py
+                                git add .
+                                git commit -m "updating ${compName}-manifest.yml and pre-manifest.yml by Build Number: ${currentBuild.number}"
+                                git push origin master
+                        """
+                    }    
+                }
+            }    
+        }
+    }
+}
+

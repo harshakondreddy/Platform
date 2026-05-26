@@ -1,0 +1,12 @@
+version: '2.1'
+
+services:
+  curator:
+    image: igs-wms-docker-stable-local.artifactory-na.honeywell.com/curator:0.0.1
+    environment:
+      ELASTICSEARCH_HOST: <<Elasticsearch_host>>
+      CRON: '*/2 * * * *'
+      TYPE: fluentd-
+      CONFIG_FILE: /usr/share/curator/config/curator.yml
+      COMMAND: /usr/share/curator/config/delete_log_files_curator.yml
+      UNIT_COUNT: <Number of days>

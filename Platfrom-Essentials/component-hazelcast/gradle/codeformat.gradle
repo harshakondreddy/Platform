@@ -1,0 +1,10 @@
+apply plugin: "com.diffplug.gradle.spotless"
+	spotless {
+       		java {
+          		target project.fileTree(project.rootDir) {
+             		include '**/*.java'
+    			exclude '**/gensrc/**'
+                	}
+        	googleJavaFormat()
+      		}
+	}

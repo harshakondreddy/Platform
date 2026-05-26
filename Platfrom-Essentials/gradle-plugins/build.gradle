@@ -1,0 +1,93 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/plugins-release' }
+        maven { url "https://plugins.gradle.org/m2/"}
+
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
+        classpath "io.spring.gradle:propdeps-plugin:0.0.9.RELEASE"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.13.0"
+    }
+}
+
+apply from: 'gradle/codeformat.gradle'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'java-gradle-plugin'
+
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
+apply plugin: 'propdeps-eclipse'
+
+group = 'com.hon.reds.platform'
+version = "2.0.0"
+
+sourceCompatibility = 11
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Intelligrated Nexgen Gradle Plugins', 'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+String repo = version.endsWith('SNAPSHOT') ? 'reds_platform-10327-unstable-maven-local' : 'reds_platform-10327-stable-maven-local'
+
+configurations { published }
+
+dependencies {
+    api "commons-codec:commons-codec:1.8"
+    api "org.ajoberstar:grgit:1.1.0"
+    optional "org.springframework.boot:spring-boot-gradle-plugin:1.4.5.RELEASE"
+    optional('org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0') {
+        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+    }
+    testImplementation group: 'junit', name: 'junit', version: '4.+'
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+    testImplementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+}
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts { archives sourcesJar }
+
+artifactoryPublish { dependsOn sourcesJar }
+
+artifactory {
+    contextUrl = 'https://artifactory-na.honeywell.com/artifactory/'
+    publish {
+        repository {
+            repoKey = repo
+            username = artifactoryUser
+            password = artifactoryPassword
+        }
+        defaults {
+            publishConfigs('archives', 'published')
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            publishPom = true
+            publishIvy = true
+        }
+    }
+}
+
+//gradle version upgrade: 5.5.1
+
+wrapper{
+
+    gradleVersion = '5.5.1'
+
+}

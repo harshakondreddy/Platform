@@ -1,0 +1,92 @@
+pipeline {
+    agent none
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timeout(time: 2, unit: 'HOURS')
+    }
+    environment { CI = 'true' }
+    triggers { pollSCM(' ') }
+
+    stages {
+        stage('Basic') {
+            agent { label 'sandbox_linux' }
+
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Basic Stage: BUILD-ONCE and USE in Subsequent Stages of Pipeline. Here build and unit test cases will be executed. On success, artifacts will be published and tagged - IRON!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.componentName} :: ${params.repoUrl} :: ${params.repo}"
+                echo "*************Parameter to this Stage *************"
+                //Checkout source code from given repository on 'master' branch.
+                script{
+                    scmVars = checkout([$class: 'GitSCM', branches: [[name: 'origin/targetpr/**']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    committerEmail = sh (
+                            script: 'git --no-pager show -s --format=\'%ae\'',
+                            returnStdout: true
+                    ).trim()
+                }
+                //Run Build and unit test cases
+                sh "chmod 755 * && ./gradlew clean build -x spotlessCheck --refresh-dependencies"
+                //Stops running docker containers
+                sh "/home/jenkins/stop-deps.sh"
+                //If hasComponentTest flag is True then execute component test cases
+                script {
+                    if (params.hasComponentTest)
+                    {
+                        sh "export SCCREPOURL=/home/jenkins/target-configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew componentTest -x spotlessCheck"
+                        //Stops running docker containers
+                        sh "/home/jenkins/stop-deps.sh"
+                
+                    //Publish test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/componentTest',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Component Report',
+                            reportTitles         : 'Component-Test-Result']
+                    )
+				}
+            }
+            //  withSonarQubeEnv('IntelligSonarQube') {
+            //         sh './gradlew --init-script /home/jenkins/quality.gradle --info sonarqube'
+            //     }
+		}
+
+            post{
+
+                success {
+                     
+                    mail to:"DL-SPSTarget-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed!!. BUILD-URL- ${env.BUILD_URL} "
+    
+                }
+                failure {
+                    mail to:"DL-SPSTarget-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed!!.  BUILD-URL- ${env.BUILD_URL}"
+                      
+               }
+                always {
+                    //Publish Junit test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/test',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Junit Report',
+                            reportTitles         : 'Unit-Test-Result']
+                    )
+                    cucumber "target/ComponentTest/cucumber.json"
+                }
+
+            }
+
+        }
+    }
+}
+

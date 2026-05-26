@@ -1,0 +1,60 @@
+# 'default' config server port is 8888
+server:
+  port: ${scc.server.port:8080}
+  
+spring:
+  application:
+    name: reds-cloud-config
+  cloud:
+    config:
+      server:
+        bootstrap: true
+        git:
+          uri: ${scc.git.uri}
+          searchPaths:  ${scc.search.paths:{application}, {application}/extended-attributes, {application}/feature-flags, {application}/properties, {application}/error-codes,{application}/seed-data,{application}/globalization,{application}/json-validator-schema,{application}/seedData}
+
+
+    bus:
+      enabled: true
+
+
+eureka:
+  instance:
+    hostname: ${virtual.host:localhost}
+    securePort: ${virtual.port:${server.port}}
+    non-secure-port-enabled: ${eureka.instance.non.secure.port.enabled:true}
+    secure-port-enabled: ${eureka.instance.secure.port.enabled:false}
+    statusPageUrl: http://${virtual.host:localhost}:${virtual.port:${server.port}}/info
+    healthCheckUrl: http://${virtual.host:localhost}:${virtual.port:${server.port}}/health
+    homePageUrl: http://${virtual.host:localhost}:${virtual.port:${server.port}}/
+    nonSecurePort: ${virtual.port:${server.port}}
+    # It's not required to set eureka.instance.instanceId, as it defaults to CLIENT IP:PORT,
+    # but if you do set it, it must be unique within the scope of the appName
+    instanceId: ${spring.application.name}-${random.value}
+    # An instance registers with a Eureka server using a given URL; then onwards,
+    # it sends heartbeats every 30s (or configurable via the following property)
+    leaseRenewalIntervalInSeconds: 30
+    # If the server doesn't receive a heartbeat, it waits 90s (or configurable via the
+    # following property) before removing the instance from registry and there by
+    # disallowing traffic to that instance
+    leaseExpirationDurationInSeconds: 60
+    metadataMap:
+      instanceId: ${spring.application.name}-${random.value}
+  client:
+    # Every instance is represented by an com.netflix.appinfo.InstanceInfo, which is a bunch of
+    # information about the instance. The InstanceInfo is sent to the Eureka server at regular
+    # intervals, starting at 40s after startup (or configurable via the following property)
+    initialInstanceInfoReplicationIntervalSeconds: 15
+    # ... and then onwards every 30s (or configurable via the following property)
+    instanceInfoReplicationIntervalSeconds: 20
+    # If eureka.client.fetchRegistry is true, the client fetches the Eureka server registry
+    # at startup and caches it locally
+    fetchRegistry: true
+    # The registry fetch is an asynchronous task scheduled every 30s (or configurable via the
+    # following property)
+    registryFetchIntervalSeconds: 10
+    serviceUrl:
+      # docker is the value mapping to the VM running docker; defined in hosts file
+      # if not using docker, define 'xxx.xxx.xxx.xxx  dockerhost' (without quotes) as an entry in hosts file
+      # where 'xxx.xxx.xxx.xxx' is the IP address of your host VM (Ubuntu, Boot2Docker or your Mac/Windows)
+      defaultZone: http://${eureka.host:dockerhost}:${eureka.port:8761}/eureka/

@@ -1,0 +1,26 @@
+version: '2.1'
+services:
+
+  ##Self Dockerimage on latest build##
+  ##TODO : Build docker image based on commitID##
+
+  component-hazelcast:
+    image: component-hazelcast:latest
+    build: .
+    ports:
+      - 8089:8080
+      - 5701:5701
+      - 5702:5702
+    environment:
+      - JAVA_OPTS=-Xmx512m
+      - EUREKA_HOST=$DOCKERHOST
+      - VIRTUAL_HOST=$DOCKERHOST
+      - MESSAGING_HOST=$DOCKERHOST
+      - hazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/
+      - hazelcast.management.console.url=http://$DOCKERHOST:18000/hazelcast-mancenter
+      - hazelcast.local.publicAddress=$DOCKERHOST:5701
+      - JAVA_OPTS="-Dhazelcast.local.publicAddress=$DOCKERHOST:5701 -Dhazelcast.serviceUrl.default=http://$DOCKERHOST:8761/eureka/"
+      - unique.app.uniqueId=HAZ
+    extra_hosts:
+      - "dockerhost:$DOCKERHOST"
+      - "localhost:$DOCKERHOST"

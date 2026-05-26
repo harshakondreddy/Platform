@@ -1,0 +1,320 @@
+def commitTag
+def ironCommitTag
+def bronzeVersionTag
+def goldVersionTag
+def scmVars
+def versionCommitImg
+def compName
+def version
+
+def verticalComponent = ""
+
+
+pipeline {
+    agent none
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timeout(time: 3, unit: 'HOURS')
+    }
+    environment { CI = 'true' }
+    triggers { pollSCM ' ' }
+
+    stages {
+        stage('Basic') {
+            agent { label 'sandbox_linux' }
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Basic Stage: BUILD-ONCE and USE in Subsequent Stages of Pipeline. Here build and unit test cases will be executed. On success, artifacts will be published and tagged - IRON!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.componentName} :: ${params.repoUrl} :: ${params.repo} :: ${params.hasSyncConsumerContractTest} "
+                echo "*************Parameter to this Stage *************"
+               
+                //Checkout source code from given repository on 'master' branch.
+                script{
+                    scmVars = checkout([$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    commitTag = scmVars.GIT_COMMIT.take(7)
+                    ironCommitTag = "iron-${commitTag}"
+                    currentBuild.displayName = "#${BUILD_NUMBER} - ${scmVars.GIT_BRANCH}"
+                    committerEmail = sh (
+                            script: 'git --no-pager show -s --format=\'%ae\'',
+                            returnStdout: true
+                    ).trim()
+                }
+                // Writing reportportal.properties for unit test reporting
+                script {
+                    if (params.hasReportal)
+                    {
+                        switch(params.componentName) {
+                            case ["component-container",  "component-location", "component-inventory", "component-order" ,"component-wave" ,"component-prioritization" ,"component-item"] :
+                                 verticalComponent = "planning-${params.componentName}"
+                                 break;
+                                            
+                        
+                            case ["component-routing" , "component-labelprinting" ,"component-capacitymanager" ,"component-momentumconnect" ,"component-momentumrouter" ,"component-prioritization"]  :
+                                    verticalComponent = "core-${params.componentName}"
+                                 break;
+                        
+                            case ["component-asrs" , "component-asrsclient", "component-asrsmanager", "component-putaway", "component-aislelinx" , "component-amr", "component-liftlinx", "component-shuttle", "component-crane", "component-socketproxy"] :
+                                verticalComponent = "storage-${params.componentName}"
+                                break;
+                                            
+                                            
+                            case ["component-picking","component-shipping" , "component-task" ,"component-businessorchestrator" ,"component-pickexecution","component-putwall" ] :
+                                 verticalComponent = "execution-${params.componentName}"
+                                 break;
+                                            
+                            case ["component-wesui" , "component-uifacade"] :
+                                verticalComponent = "client-${params.componentName}"
+                                break;
+                        
+                            default:
+                                verticalComponent = "${params.componentName}"
+                                break;
+                        }
+                        
+                        writeFile file: "${env.WORKSPACE}/src/main/resources/reportportal.properties", 
+                        text: "rp.endpoint =  http://10.224.93.233:8080\rrp.uuid = fc404029-4db3-4a78-a060-90882ff5709d\rrp.project = reds_components\rrp.enable = true\rrp.launch = ${verticalComponent}-unit-test"
+                        sh "ls -l ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                        sh "cat ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                    }
+                }
+                //Ends here##
+                //Run Build and unit test cases
+                sh "chmod 755 * && ./gradlew clean build -x spotlessCheck --refresh-dependencies"
+                //Stops running docker containers
+                sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                //If hasComponentTest flag is True then execute component test cases
+                script {
+                    if (params.hasComponentTest)
+                    {
+                        // Writing reportportal.properties for component test reporting
+                        script {
+                            if (params.hasReportal)
+                            {                       
+                                writeFile file: "${env.WORKSPACE}/src/main/resources/reportportal.properties", 
+                                text: "rp.endpoint =  http://10.224.93.233:8080\rrp.uuid = fc404029-4db3-4a78-a060-90882ff5709d\rrp.project = reds_components\rrp.enable = true\rrp.launch = ${verticalComponent}-component-test"
+                                sh "ls -l ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                                sh "cat ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                            }
+                        }
+                        sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew build -x test -x componentTest -x integrationTest -x spotlessCheck && ./gradlew componentTest -x test -x integrationTest -x spotlessCheck"
+                        //Stops running docker containers
+                        sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                
+                    //Publish test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/componentTest',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Component Report',
+                            reportTitles         : 'Component-Test-Result']
+                    )
+                }
+            }
+            //  withSonarQubeEnv('IntelligSonarQube') {
+            //         sh './gradlew --init-script /home/jenkins/quality.gradle --info sonarqube -x test'
+            //     }
+        }
+
+            post{
+
+                success {
+                    sh "git tag -f ${ironCommitTag} && git push -f origin ${ironCommitTag}"
+                    script{
+                        def fullVersion =sh(script: "./gradlew properties -q | grep \"^version:\" | awk '{match(\$2,\"[0-9].[0-9].[0-9]*\",a)}END{print a[0]}'",
+                        returnStdout: true
+                        ).trim()
+
+						//Fix for a component version is moving out of snapshot eg: 1.2.4-SNAPSHOT to 1.2.4               					
+					    def result = fullVersion.indexOf('-')
+
+                        if(result != -1)
+                            version = fullVersion.substring(0, fullVersion.indexOf("-"))
+                        else 
+                            version = fullVersion
+							
+                        compName = params.componentName.substring(10)
+                        versionCommitImg = "igs-wms-docker-stable-local.artifactory-na.honeywell.com/${compName}:${fullVersion}-${commitTag}"    
+                        bronzeVersionTag = "bronze-${version}-${commitTag}"
+                        goldVersionTag = "gold-${version}-${commitTag}"
+                    }
+                    //Build Docker Image
+                      sh "./gradlew buildDockerImage -x spotlessCheck  -x test"
+                    //Publish docker image with version, version+commitId and latest tag
+                      sh "./gradlew pushDockerImage -x buildDockerImage -x spotlessCheck  -x test"
+                    //Publish docker image with "iron" tag
+                      sh "./gradlew -x spotlessCheck  -x test pushDockerImage -PcustomTag=iron -PinputImg=$versionCommitImg"
+                    //Publish docker image with "iron-<commitId>" tag
+                      sh "./gradlew -x spotlessCheck  -x test pushDockerImage -PcustomTag=${ironCommitTag} -PinputImg=$versionCommitImg"
+                      mail to:" DL-SPSBigLots-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed Basic stage!!. BUILD-URL- ${env.BUILD_URL} "
+               }
+                failure {
+                      mail to:" DL-SPSBigLots-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed Basic stage!!.  BUILD-URL- ${env.BUILD_URL}"
+                }
+                always {
+                    //Publish Junit test reports
+                    publishHTML(target: [
+                            allowMissing         : false,
+                            alwaysLinkToLastBuild: false,
+                            includes             : '**/*',
+                            keepAll              : false,
+                            reportDir            : 'build/reports/tests/test',
+                            reportFiles          : 'index.html',
+                            reportName           : 'Junit Report',
+                            reportTitles         : 'Unit-Test-Result']
+                    )
+                    cucumber "target/ComponentTest/cucumber.json"
+                }
+
+            }
+
+        }
+        stage('Extended') {
+            agent { label 'sandbox_linux' }
+            steps {
+                step([$class: 'WsCleanup'])
+                echo "Extended Stage: Use BUILT-PACKAGE and TAGGED (Iron) to Run more extensive test cases (Like Integration test, Consumer Tests, etc..). On success, artifacts will be published and tagged - BRONZE!!"
+                echo "*************Parameter to this Stage *************"
+                echo " ${params.componentName} :: ${params.repoUrl} :: ${params.repo} :: ${params.hasSyncConsumerContractTest} :: ${ironCommitTag}"
+                echo "*************Parameter to this Stage *************"               
+                
+                
+                //If hasIntgTest flag True then execute the intg-test cases.
+                script {
+                    //Checkout source code from given repository on 'master' branch.
+                     checkout([$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "${params.repoUrl}"]]])
+                    sh "chmod 755 * "
+                    //Stops running docker containers
+                    sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    if (params.hasAsyncProviderContractTest || params.hasAsyncConsumerContractTest){
+                        //Run Build and unit test cases
+                        sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew install"
+                        sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    }
+                    
+                    if(params.hasAsyncConsumerContractTest)
+                    {
+                         sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && ./gradlew asyncConsumerContractTest -x spotlessCheck"
+                         //Stops running docker containers
+                         sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    }
+                    
+                    if(params.hasAsyncProviderContractTest)
+                    {
+                     sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && ./gradlew asyncProviderContractTest -x spotlessCheck"
+                     //Stops running docker containers
+                     sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    }
+                    
+                    if(params.hasSyncConsumerContractTest)
+                    {
+                     sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew syncConsumerContractTest -x spotlessCheck"
+                     //Stops running docker containers
+                     sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    }
+                    if(params.hasSyncProviderContractTest)
+                    {
+                     sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && sleep 60s && ./gradlew syncProviderContractTest -x spotlessCheck"
+                     //Stops running docker containers
+                     sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                    }
+                    if (params.hasIntgTest)
+                    {
+                        if (params.hasReportal)
+                            {
+                                writeFile file: "${env.WORKSPACE}/src/main/resources/reportportal.properties",
+                                text: "rp.endpoint =  http://10.224.93.233:8080\rrp.uuid = fc404029-4db3-4a78-a060-90882ff5709d\rrp.project = reds_components\rrp.enable = true\rrp.launch = ${verticalComponent}-integration-test"
+                                sh "ls -l ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                                sh "cat ${env.WORKSPACE}/src/main/resources/reportportal.properties"
+                            }
+                        
+                     sh "export SCCREPOURL=/home/jenkins/configuration && ./start-deps-pets.sh && sleep 60s && ./start-deps-components.sh && sleep 150s && ./gradlew integrationTest -x test -x componentTest -x spotlessCheck"
+                     //Stops running docker containers
+                     sh "docker stop \$(docker ps -aq) && docker system prune -a -f || true"
+                     publishHTML(target: [
+                        allowMissing         : false,
+                        alwaysLinkToLastBuild: false,
+                        includes             : '**/*',
+                        keepAll              : false,
+                        reportDir            : 'build/reports/tests/integrationTest',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Integration Report',
+                        reportTitles         : 'Integration-Test-Result']
+                    )
+                    }
+                }           
+            }
+            post{
+                success {
+                    //Publish Artifacts
+                     sh "./gradlew build -x test -x componentTest -x integrationTest -x spotlessCheck && ./gradlew artifactoryPublish -x spotlessCheck"
+                    //Tag source repository as bronzeVersionCommitIdBuild
+                    sh "git tag -f ${bronzeVersionTag} && git push -f origin ${bronzeVersionTag}"
+                    //Pull Docker Image from last Stage 
+                    sh "docker pull $versionCommitImg"
+                    //Tag and publish docker versionCommitImg image as bronze 
+                    sh "./gradlew pushDockerImage -PcustomTag=bronze -PinputImg=$versionCommitImg -x buildDockerImage -x spotlessCheck"
+                    //Tag and publish docker versionCommitImg image as bronzeVersionCommitId 
+                    sh "./gradlew pushDockerImage -PcustomTag=${bronzeVersionTag} -PinputImg=$versionCommitImg -x buildDockerImage -x spotlessCheck"
+
+                     //Publish docker image in Honeywell Artifactory
+                    sh "docker tag $versionCommitImg intellig-wes-docker-stable-local.artifactory-na.honeywell.com/${compName}:${bronzeVersionTag}"
+                    sh "docker push intellig-wes-docker-stable-local.artifactory-na.honeywell.com/${compName}:${bronzeVersionTag}"
+                    
+                    mail to:" DL-SPSBigLots-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Passed Extended stage!!. BUILD-URL- ${env.BUILD_URL} "
+                }
+                failure {
+                    mail to:" DL-SPSBigLots-Tribe-Team@Honeywell.com, ${committerEmail}", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Oops!! Failed Extended stage!!.  BUILD-URL- ${env.BUILD_URL}"
+           
+                }
+                always {
+                    echo "always block"
+                    //TODO: DEVOPS-820 for reporting
+                   // cucumber "target/IntegrationTest/cucumber.json"
+                }
+            }
+        }
+       
+        stage('Update Pre-Manifest') {
+            agent { label 'sandbox_linux' }
+            steps {
+                lock('manifestLock') {
+                    script {
+                        //Checkout source code from given repository on 'master' branch.
+                        checkout([$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false,
+                                        extensions: [[$class: 'LocalBranch', localBranch: '**'], [$class: 'PerBuildTag'], [$class: 'RelativeTargetDirectory', 
+            relativeTargetDir: '/home/jenkins/workspace/manifests']], submoduleCfg: [],
+                                        userRemoteConfigs: [[url: "ssh://git@bitbucket.honeywell.com:7999/rps/manifests.git"]]])
+        
+                        //update component manifest file
+                        if(!fileExists("${compName}-manifest.yml"))
+                        {
+                            echo "file does not exist"
+                            sh """
+                        cd /home/jenkins/workspace/manifests/component-manifests
+                                    cp component-manifest-template.yml ${compName}-manifest.yml
+                            """
+                        }
+                        sh """
+                                cd /home/jenkins/workspace/manifests
+                                python compManParser.py ${compName} ${bronzeVersionTag} ${version} ${commitTag}
+                                python predepManParser.py ${compName} ${bronzeVersionTag} ${version} ${commitTag}
+                                python versionIncrementer.py
+                                git add .
+                                git commit -m "updating ${compName}-manifest.yml and pre-manifest.yml by Build Number: ${currentBuild.number}"
+                                git push origin master
+                        """
+                    }    
+                }
+            }    
+        }
+    }
+}

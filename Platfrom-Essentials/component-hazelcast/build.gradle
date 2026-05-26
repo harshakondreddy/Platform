@@ -1,0 +1,97 @@
+buildscript {
+	ext {
+		springBootVersion = '2.1.13.RELEASE'
+		reds3PlStarterVersion = '2.0.0'
+		redsStarterVersion = '2.0.0'
+		eurekaClientVersion='1.8.6'
+		capacityManagerVersion='3.0.0-SNAPSHOT'
+		routingVersion='3.0.0-SNAPSHOT'
+        printVersion='3.0.0-SNAPSHOT'
+        orderVersion='3.0.0-SNAPSHOT'
+		springCloudVersion = 'Greenwich.SR2'		
+
+	}
+	repositories {
+		mavenCentral()
+		jcenter()
+		maven { url 'https://repo.spring.io/plugins-release' }
+		maven{
+			url 'https://artifactory-na.honeywell.com/artifactory/reds_platform-10327-stable-maven-local/'
+			credentials {
+				username = hwArtifactoryUser
+				password = hwArtifactoryPassword
+			}
+		}
+		maven{
+			url 'https://artifactory-na.honeywell.com/artifactory/reds_platform-10327-unstable-maven-local/'
+			credentials {
+				username = hwArtifactoryUser
+				password = hwArtifactoryPassword
+			}
+		}
+	}
+	dependencies {
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+		classpath "io.spring.gradle:dependency-management-plugin:0.6.0.RELEASE"
+		classpath("com.hon.reds.starters:reds-gradle-starter:${redsStarterVersion}")
+
+	}
+}
+plugins {
+	id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
+}
+
+apply from: 'gradle/codeformat.gradle'
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven'
+
+group = 'com.hon.reds.cache'
+version = '2.0.0'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+	jcenter()
+	maven { url 'https://repo.spring.io/plugins-release' }
+	maven { url "https://artifactory-na.honeywell.com/artifactory/wes-libs-snapshot-maven-stable-local" }
+	maven{
+		url 'https://artifactory-na.honeywell.com/artifactory/reds_platform-10327-stable-maven-local/'
+		credentials {
+			username = hwArtifactoryUser
+			password = hwArtifactoryPassword
+		}
+	}
+	maven{
+		url 'https://artifactory-na.honeywell.com/artifactory/reds_platform-10327-unstable-maven-local/'
+		credentials {
+			username = hwArtifactoryUser
+			password = hwArtifactoryPassword
+		}
+	}
+	mavenLocal()
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom "org.springframework.boot:spring-boot-starter-parent:${springBootVersion}"
+	}
+}
+
+dependencies {
+    compile ("com.hon.reds.starters:reds-cache3pl-starter:${reds3PlStarterVersion}")
+	compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+	compile("com.netflix.eureka:eureka-client:${eurekaClientVersion}")
+	compile("org.springframework.boot:spring-boot-starter-web")
+	compile("com.honeywell.intelligrated.wes.capacitymanager:capacitymanager-cache:${capacityManagerVersion}")
+	compile("com.honeywell.intelligrated.wes.order:order-cache:${orderVersion}")
+
+	testCompile("org.springframework.boot:spring-boot-starter-test")
+	compile("com.honeywell.intelligrated.wes.routing:routing-cache:${routingVersion}")
+	compile("com.honeywell.intelligrated.wes.print:print-cache:${printVersion}")
+}
+
+wrapper { gradleVersion = '5.5.1' }
+

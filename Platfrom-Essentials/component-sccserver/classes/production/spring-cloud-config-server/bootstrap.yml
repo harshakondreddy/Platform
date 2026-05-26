@@ -1,0 +1,30 @@
+# 'default' config server port is 8888
+server:
+  port: 8080
+  
+spring:
+  application:
+    name: reds-configserver
+  cloud:
+    config:
+      server:
+        bootstrap: true
+        git:
+          uri: C:\\SCC_Bus-test\\reds-scc-repo\\sccServer
+          #uri: https://caparna@bitbucket.org/caparna/bittest.git
+          #uri: ssh://git@bitbucket.intellig.local:7999/~h308509/reds-scc-config.git
+          #profile: default
+          #uri: C:\\REDS-SCC-POC\\sccServer
+          #force-pull: true #force server to pull from remote repo if local copy is dirty
+          searchPaths: Configuration\\{application}, Configuration\\{application}\\ext-attrs, Configuration\\{application}\\feature-flags, Configuration\\{application}\\properties
+
+        #monitor:
+          #git:
+            #enabled: false
+    bus:
+      enabled: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

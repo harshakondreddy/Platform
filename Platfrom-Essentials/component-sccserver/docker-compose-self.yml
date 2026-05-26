@@ -1,0 +1,21 @@
+version: '2.1'
+services:
+
+##Self Dockerimage on latest build##
+##TODO : Build docker image based on commitID##
+
+  cloud-config:
+    image: reds-cloud-config:latest
+    build: .
+    ports:
+      - 8080:8080
+    volumes:
+      - $SCCREPOURL:/honeywell/wes
+    environment:
+      - EUREKA_HOST=$DOCKERHOST
+      - VIRTUAL_HOST=$DOCKERHOST
+      - MESSAGING_HOST=$DOCKERHOST
+      - SCC_GIT_URI=/honeywell/wes
+      - JAVA_OPTS=-Xmx512m
+    extra_hosts:
+      - "dockerhost:$DOCKERHOST"

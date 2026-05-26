@@ -1,0 +1,43 @@
+def mailRecipients = "DL-SPS_REDS_Platform-Team@HoneywellProd.onmicrosoft.com"
+pipeline {
+    agent { label 'jdk-11-node' }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'HOURS')
+    }
+    
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+                echo 'Pulling from branch: ' + env.BRANCH_NAME
+            }           
+        } 
+        stage('Build') {
+            steps {
+                script {
+                    sh './gradlew clean build'
+                  
+                }
+            }
+        }
+        stage('Publish') {
+            steps {
+                script {
+
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME =~ 'maint/*' || env.BRANCH_NAME =~ 'feature/*') {
+
+                        sh './gradlew artifactoryPublish'
+                    }
+                }
+            }
+        }  
+    }
+    post {
+    	always {
+           mail to: "${mailRecipients}", subject: "BUILD STATUS: ${currentBuild.fullDisplayName}: ${currentBuild.currentResult}", body: "Build Status: ${currentBuild.currentResult} \n URL: ${env.BUILD_URL} "
+        }
+    }
+}
+

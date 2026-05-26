@@ -1,0 +1,59 @@
+Configuration:
+  status: WARN
+  monitorInterval: 60
+
+  appenders:
+    RollingFile:
+      name: LogToFile
+      fileName: /honeywell/logs/@@rootProjectName@@.log
+      filePattern: "/honeywell/logs/$${date:yyyy-MM}/@@rootProjectName@@-%d{MM-dd-yyyy}-%i.log.gz"
+      PatternLayout:
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [@@appName@@,%X{traceId},%X{spanId}] ${sys:PID:- } --- [%15.15t] %-40.40logger{45} : %msg%n"
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: ${sys:logfile.size:-100}MB
+      DefaultRollOverStrategy:
+        max: ${sys:max.retain.logfiles:-10}
+
+  Loggers:
+    logger:
+      - name: com.hon.reds
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+      - name: @@appPackageName@@
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+      - name: org.springframework.security
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+      - name: org.apache.http
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+      - name: org.apache.http.wire
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+      - name: com.netflix
+        level: INFO
+        additivity: false
+        AppenderRef:
+          - ref: LogToFile
+
+    Root:
+      level: INFO
+      AppenderRef:
+        - ref: LogToFile

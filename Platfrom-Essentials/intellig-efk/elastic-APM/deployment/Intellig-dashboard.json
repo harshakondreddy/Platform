@@ -1,0 +1,74 @@
+[
+  {
+    "_id": "6dc61350-f023-11e9-b790-1bb8caa0ea77",
+    "_type": "dashboard",
+    "_source": {
+      "title": "[Intellig-APM] metrics",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"1\"},\"id\":\"163aace0-f01e-11e9-b790-1bb8caa0ea77\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.4.1\",\"title\":\"Intellig [CPU-usage]\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"asc\"}}}},\"gridData\":{\"x\":0,\"y\":41,\"w\":48,\"h\":17,\"i\":\"3\"},\"id\":\"d33c60c0-f020-11e9-b790-1bb8caa0ea77\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"version\":\"6.4.1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":13,\"i\":\"4\"},\"id\":\"853f95a0-f01f-11e9-b790-1bb8caa0ea77\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"6.4.1\",\"title\":\"Intellig [Heap-usage]\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":26,\"w\":24,\"h\":15,\"i\":\"5\"},\"id\":\"1f28dac0-f028-11e9-b790-1bb8caa0ea77\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"6.4.1\",\"title\":\"Intellig [Non Heap-usage]\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":26,\"w\":24,\"h\":15,\"i\":\"7\"},\"id\":\"9f9be660-f038-11e9-b790-1bb8caa0ea77\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"6.4.1\",\"title\":\"Intellig [Thread-count]\"}]",
+      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+      "version": 1,
+      "timeRestore": false,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "163aace0-f01e-11e9-b790-1bb8caa0ea77",
+    "_type": "visualization",
+    "_source": {
+      "title": "APM [CPU-usage]",
+      "visState": "{\"title\":\"APM [CPU-usage]\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"apm*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(101,50,148,1)\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":1,\"metrics\":[{\"id\":\"a625f740-f01b-11e9-abc7-11a167654d4b\",\"type\":\"avg\",\"field\":\"system.process.cpu.total.norm.pct\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"context.service.name\",\"terms_order_by\":\"_term\",\"split_color_mode\":\"rainbow\",\"terms_size\":\"30\"}],\"show_grid\":0,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\",\"annotations\":[],\"ignore_global_filter\":0},\"aggs\":[]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "9f9be660-f038-11e9-b790-1bb8caa0ea77",
+    "_type": "visualization",
+    "_source": {
+      "title": "APM [Thread-count]",
+      "visState": "{\"title\":\"APM [Thread-count]\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"apm*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(101,50,148,1)\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":1,\"metrics\":[{\"id\":\"a625f740-f01b-11e9-abc7-11a167654d4b\",\"type\":\"count\",\"field\":\"jvm.thread.count\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"context.service.name\",\"terms_order_by\":\"_term\",\"split_color_mode\":\"rainbow\",\"terms_size\":\"30\"}],\"show_grid\":0,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\",\"annotations\":[],\"ignore_global_filter\":0},\"aggs\":[]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "853f95a0-f01f-11e9-b790-1bb8caa0ea77",
+    "_type": "visualization",
+    "_source": {
+      "title": "APM [Heap-usage]",
+      "visState": "{\"title\":\"APM [Heap-usage]\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"apm*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(101,50,148,1)\",\"fill\":\"0.4\",\"formatter\":\"bytes\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":\"1\",\"metrics\":[{\"id\":\"a625f740-f01b-11e9-abc7-11a167654d4b\",\"type\":\"avg\",\"field\":\"jvm.memory.heap.used\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"context.service.name\",\"terms_order_by\":\"_term\",\"terms_size\":\"10\",\"terms_direction\":\"desc\",\"split_color_mode\":\"rainbow\",\"value_template\":\"\",\"steps\":0}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\",\"annotations\":[],\"ignore_global_filter\":0,\"background_color_rules\":[{\"id\":\"71bb61d0-f4e3-11e9-a2b7-8d88f608bd28\"}]},\"aggs\":[]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "1f28dac0-f028-11e9-b790-1bb8caa0ea77",
+    "_type": "visualization",
+    "_source": {
+      "title": "APM [Non Heap-usage]",
+      "visState": "{\"title\":\"APM [Non Heap-usage]\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"apm*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(101,50,148,1)\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":\"1\",\"metrics\":[{\"id\":\"a625f740-f01b-11e9-abc7-11a167654d4b\",\"type\":\"avg\",\"field\":\"jvm.memory.non_heap.used\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"context.service.name\",\"terms_order_by\":\"_term\",\"terms_size\":\"30\",\"terms_direction\":\"desc\",\"split_color_mode\":\"rainbow\",\"value_template\":\"\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\",\"annotations\":[],\"ignore_global_filter\":0},\"aggs\":[]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+    }
+  }
+]
